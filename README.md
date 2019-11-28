@@ -10,7 +10,7 @@ output: rmarkdown::github_document
 En este ejercicio vamos a trabajar con un dataset de SNP chip que incluye diferentes poblaciones. El objetivo es comprender la variación genética humana a través de la historia poblacional. Elegimos un SNP chip array diseñado para los estudios de historia humana, para maximizar la información sobre diversidad humana y reconstruir eventos demográficos. El nombre de lo SNP chip es Human Origins (Affymetrix). El array incluye SNPs que se encuentran en poblaciones de diferentes continentes, para minimizar el ascertainment bias effect. 
 
 
-Trabajamos con PLINK para mirar el dataset y correr simples análisis, y ADMIXTURE para reconstruir componentes de ancestralidad entre los individuos.   
+Trabajamos con PLINK para mirar el dataset y correr simples análisis, y ADMIXTURE para reconstruir componentes de ascendencias entre los individuos.   
 
 El dataset incluye 100 individuos y 14 poblaciones de Africa y Medio Oriente. El dato esta publicado en [Patterson et al. 2012](https://reich.hms.harvard.edu/sites/reich.hms.harvard.edu/files/inline-files/2012_Patterson_AncientAdmixture_Genetics.pdf) 
 and [Lazaridis et al. 2014](https://reich.hms.harvard.edu/sites/reich.hms.harvard.edu/files/inline-files/2014_Nature_Lazaridis_EuropeThreeAncestries.pdf) .
@@ -224,7 +224,7 @@ ___________________________
 
 Identificar componentes de ascendencia compartidas entre individuos, en un set de poblaciones. 
 
-ADMIXTURE toma el formato de archivo de PLINK.  Mas informaciones en https://www.genetics.ucla.edu/software/admixture/.
+ADMIXTURE toma el formato de archivo de PLINK.  Mas informaciones en <https://www.genetics.ucla.edu/software/admixture/>.
 
 
 ### Pruning
@@ -343,63 +343,69 @@ Mira a los patrones de admixture entre poblaciones. Siguen un patrón geográfic
 ________________________________
 
 
-# SECOND PART: PHYLOGENIES
+# SEGUNDA PARTE: FILOGENIA
 
-### Handling sequence data and a matrix of distances
+### Trabajar con datos de secuencia y matrices de distancia 
 
-Handling genetic alignments, genetic distance, trees, genetic distance between populations.
-Sequence data from Barbieri et al. 2013 "Unraveling the Complex Maternal History of Southern African Khoisan Populations"" (mitochondrial sequences mtDNA)
-Original sequences are deposited at <http://www.ncbi.nlm.nih.gov/popset?DbFrom=nuccore&Cmd=Link&LinkName=nuccore_popset&IdsFromResult=444211048>
 
-This part of the tutorial will be performed in R.
+Vamos a mirar a genetic alignment, distancia genética, arboles, distancia genética entre poblaciones.
 
-## 1. Sequence alignment
+Datos de secuencia desde Barbieri et al. 2013 "Unraveling the Complex Maternal History of Southern African Khoisan Populations"" (mitochondrial sequences mtDNA)
+Las secuencias originales se encuentran en datos de bases públicos: <http://www.ncbi.nlm.nih.gov/popset?DbFrom=nuccore&Cmd=Link&LinkName=nuccore_popset&IdsFromResult=444211048>
 
-Load packages in R with the analysis that you will need.
+En esta parte vamos a trabajar en R.
+
+## 1. Sequence alignments
+
+Cargamos los packages en R.
 
 ```{r, message=FALSE, warning=FALSE}
-library(ape, adegenet)
+library(ape) 
+library(adegenet)
 library(phangorn)
 library (lattice)
 library(MASS)
 
 ```
 
-Import the sequence data
+Importar las secuencias genéticas
+
 ```{r}
 seq<-read.dna("reducedSet100sequences.fasta", format="fasta")
 ```
-check the alignment!
+Mirar al alineamiento genético  
+
 ``` {r seq}
 print(seq)
 ```
 
 
-# 2. Tree based on individual distances  - NJ
+## 2. Árbol desde distancia genética - NJ
 
-Now we calculate a simple genetic distance between sequences.
+Calculamos una simple distancia genética entre secuencias
+
 
 ```{r}
 dist.matrix <- dist.dna(seq) # Calculate distance matrix
 m5<- as.dist(dist.matrix, diag=F, upper=F)
 ```
-We create a Neighbour Joining tree from the matrix of pairwise distance
+Desde la matriz de distancia, calculamos un Neighbor Joining Tree.
+
 ```{r}
 treeRED<-nj(m5)   #create the object neighbour joining tree 
 treeRED$edge.length[treeRED$edge.length < 0] = 0.002 #little trick to avoid negative branches
 ```
-Plot the tree and add a legend
+Visualizamos el árbol, con una leyenda. 
+
 ```
+pdf("treeNJ.pdf)
 plot.phylo(treeRED, type="u", tip.col="blue", cex=0.3 ) #plot the tree as unrooted
+dev.off()
 
 ```
-here the tree without colors
 
-```{r, echo=FALSE}
-plot(treeRED, type="u", cex=0.3 ) #plot the tree as unrooted
-```
+## 3. Maximum Parsimony analysis con secuencias
 
-## 3. Maximum Parsimony analysis on sequences
 ```
 fasta.phyDat  <- as.phyDat(seq) # convert to phangorn data type
 njtree <- nj(dist.matrix) # Calculate NJ tree
@@ -411,35 +417,45 @@ Parsimony Ratchet algorithm
 ```
 tree.pratchet <- pratchet(fasta.phyDat, maxit=100, k=10, rearrangements="SPR")
 ```
- Root tree: I have an outlier, a sequence from a Neandertal bone remain.
+Fijar la raíz del árbol: tengo un outlier, he incluido una secuencia de Neandertal. 
+
 ```
 tree.pratchet <- root(tree.pratchet, match("Neandertal", tree.pratchet$tip.label), resolve.root=T)
 ```
-Annotate with the number of mutations per branch
+Anotar con el numero de mutaciones en cada rama. 
+
+
 ```
 tree.pratchet <- acctran(tree.pratchet, fasta.phyDat)
 ```
- Plot tree
+Visualizar el árbol. 
+
 ```
+pdf("TreeMP.pdf")
 plot(tree.pratchet, tip.col="blue", cex=0.3)
 edgelabels(tree.pratchet$edge.length)
+dev.off()
+
 ```
- Write the tree to a file
+Guardar el árbol en un archivo. 
 ```
 write.tree(tree.pratchet, file="output.tree")
 ```
-now you can open it with FigTree or SplitsTree if you want!
-
-download the software FigTree <http://tree.bio.ed.ac.uk/software/figtree/>
+Puedes abrir el árbol con otros software y modificarlo (ejemplo, FigTree o SplitsTree). 
 
 
-Plus: check the number of mutations. How old is the root of the tree? Soares et al. (2009) calculated the mutation rate of the whole mtDNA genome molecule to be one mutation every 3624 years. <http://www.sciencedirect.com/science/article/pii/S0002929709001633/>
+Puedes descargar FigTree aquí <http://tree.bio.ed.ac.uk/software/figtree/>
 
 
-# 4. Trees based on population distance
-### Neighbour Joining tree populations
-Visualize population distances with a tree (unrooted). Find outliers.
-I will use an external file to add a color coding to the populations, corresponding to their Language Family.
+EXTRA: mira al numero de mutaciones. Cuanto antigua es la raíz del árbol? Soares et al. (2009) calcularon la mutation rate del ADN mitocondrial como una mutación cada 3624 años. 
+ <http://www.sciencedirect.com/science/article/pii/S0002929709001633/>
+
+
+## 4. Arboles desde distancia entre poblaciones
+### Neighbour Joining tree poblaciones
+
+Visualizar distancias entre poblaciones con un árbol (sin raíz). Mira a los outliers. 
+Utilizamos un fichero con información sobre cada población, para colorarlas con su familia lingüística. 
 
 ```{r}
 popOrder <- read.table("popOrderColor", as.is=T)
@@ -454,17 +470,24 @@ treeTest<-nj(m5)
 treeTest$edge.length[treeTest$edge.length < 0] = 0.002
 rownames(popOrder)<-popOrder[,1]
 popOrder2<-popOrder[treeTest$tip.label,]
+pdf("treeNJ_populations.pdf")
 plot.phylo(treeTest, type="u", tip.col=popOrder2[,2] )
 nomi<-c("Bantu","Khoe","Kx'a","Tuu")
 legend("topleft",nomi,text.col=c("darkmagenta","blue","green","red"))
+dev.off()
+
 ```
 
-### UPGMA tree populations
+### UPGMA tree poblaciones
 
 ```{r}
 upgmatree<-upgma(m5)
+pdf("treeUPGMA_populations.pdf")
+
 plot.phylo(upgmatree,  tip.col=popOrder2[,2] )
 legend("topleft",nomi,text.col=c("darkmagenta","blue","green","red"))
+dev.off()
+
 ```
 
-What are the differences between the two trees?
+Cuales son las diferencias entre los dos arboles? 
