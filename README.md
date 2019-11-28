@@ -354,7 +354,7 @@ text(labels.coords, par("usr")[3] + 1.03 , srt = 45, adj = 0, labels = namespop,
 Look at patterns across populations. Do they follow a geographic structure? Is there a sign of Admixture?
 
 ... 
-
+________________________________
 
 
 # SECOND PART: PHYLOGENIES
@@ -383,9 +383,6 @@ Import the sequence data
 ```{r}
 seq<-read.dna("reducedSet100sequences.fasta", format="fasta")
 ```
-*IMPUTATION* 
-Here I use an imputed DNA alignment to minimize the amount of missing data, and the consequent uncertainity in phylogenetic reconstruction! Positions with missing data were replaced by the same base of the closest sequences in the whole dataset. 
-
 check the alignment!
 ``` {r seq}
 print(seq)
