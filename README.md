@@ -5,7 +5,7 @@ date: "28/11/2019"
 output: rmarkdown::github_document
 ---
 
-## A dataset of Human Diversity
+# PRIMERA PARTE: UN DATASET DE DIVERSIDAD GENETICA HUMANA
 
 En este ejercicio vamos a trabajar con un dataset de SNP chip que incluye diferentes poblaciones. El objetivo es comprender la variación genética humana a través de la historia poblacional. Elegimos un SNP chip array diseñado para los estudios de historia humana, para maximizar la información sobre diversidad humana y reconstruir eventos demográficos. El nombre de lo SNP chip es Human Origins (Affymetrix). El array incluye SNPs que se encuentran en poblaciones de diferentes continentes, para minimizar el ascertainment bias effect. 
 
@@ -193,8 +193,9 @@ ___________________________
 
 ## PCA
 
-With the modifier *--pca*. PLINK extracts the top 20 principal components of the variance-standardized relationship matrix. 
-The results consist in a *.eigenvec* file with the coordinates for each individual in rows and eigenvectors in columns, and a *.eigenval* which explains how much variance there is in the data for that given vector. 
+Con el flag modificador *--pca* PLINK extrae las primeras 20 componentes principales de la matriz de relación estandarizada de varianza.
+
+Los resultados consisten en un archivo *.eigenvec* con las coordinadas de cada individuo en cada línea,  y un fichero *.eigenval* que explica cuanta varianza esta en el dato para cada vector. 
 
 ```{r message=FALSE, warning = FALSE}
 eigenvec<-read.table("plink.eigenvec")
@@ -213,36 +214,37 @@ gg
 
 ```
 
-One group is clearly an outlier. Repeat the analysis after excluding this population.
+Un grupo es un outlier. Que pasa cuando repetimos las análisis excluyendo esta población?
+
 
 ___________________________
 
 # ADMIXTURE analysis
 
 
-Identifying ancestry components shared between individuals of a set of populations.
+Identificar componentes de ascendencia compartidas entre individuos, en un set de poblaciones. 
 
-ADMIXTURE is a software that works similarly to Structure, but with faster computation time. Download and manual from https://www.genetics.ucla.edu/software/admixture/. It takes plink format input files.
-
+ADMIXTURE toma el formato de archivo de PLINK.  Mas informaciones en https://www.genetics.ucla.edu/software/admixture/.
 
 
 ### Pruning
 
-First, we prune the dataset for excluding the SNPs in Linkage, with Plink. The resulting file will have less SNPs, and the computation will be faster. 
+Primero, hacemos pruning del dataset para excluir SNPs in linkage. 
 
-The settings define window size, step and the r2 threshold.
+El fichero resultante tendrá menos SNPs, y las computaciones serán mas rápidas. 
+
 
 ```
 plink --bfile HumanDataHO --indep-pairwise 200 25 0.4 --out x.tmp
 plink --bfile HumanDataHO --extract x.tmp.prune.in --recode12 --out HumanDataHO_pruned
 ```
 
-How many SNPs are left after pruning?
+Cuantos SNPs quedan después de hacer pruning?
 
 
 ### ADMIXTURE run
 
-Now the proper ADMIXTURE run. The following commands will run ADMIXTURE for each *K* (number of ancestry blocks) desired. One value of *K* will be more supported by the analysis: the one with the lowest associated cross-validation error. This *K* will be considered as the best representation of the actual data variation.
+Ahora la análisis de ADMIXTURE. Corremos ADMIXTURE para cada numero de *K* (bloque de ascendencia) que queremos. Un valor de *K* será mas suportado: el valor con el cross-validation error mas bajo. Este *K* se considera como la mejor representación de la variación en nuestro dataset. 
 
 ```
 typeset -i run=0
@@ -252,50 +254,29 @@ mv HumanDataHO_pruned.$K.P K$K.Run1.P;
 mv HumanDataHO_pruned.$K.Q K$K.Run1.Q;
 done
 ```
-For each run there are three output: .out, .P, and .Q
+En cada “run” hay tres outputs: .out, .P, and .Q
 
-Now we will elaborate the outputs with a mix of bash commands and *R*.
+Elaboramos los outputs in R. 
 
-### Cross-validation error to identify the best value of *K*
+### Cross-validation error para buscar el mejor valor de *K*
 
 ```
 grep -h CV log*out > CV.txt
 ```
-plot the distribution of values associated to each K in R.
+Mira a la distribución de valores asociados a cada *K*.
 
-```{r message=FALSE, warning = FALSE}
 
-read.table("CV.txt")->cv  
+Es ideal de ejecutar varias iteraciones para cada *K*. 
 
-# set which one was the smallest and the largest K that you ran
-minK<-2
-maxK<-10
-
-ordine<-c()
-for (k in minK:maxK){
-  ordine[k]<-paste("(K=",k,"):",sep="", collapse = "")
-}
-
-ordine <- ordine[!is.na(ordine)]
-
-library(ggplot2)
-
-p <- ggplot(cv, aes(x=V3, y=V4)) + 
-  geom_boxplot()+ 
-  ggtitle("values associated to each K")+
-  scale_x_discrete(limits=ordine)
-  
-p
-```
-
-I previously run 5 iterations for each K and determined which of the 5 runs has the highest likelihood. This is to exclude the chance that some run did not perform correctly.
+Se analizará la iteración con la likelihood mas alta. Esto es para evitar que algunas iteración no ejecuten correctamente. 
 
 _______________
 
 
-### Plotting the ADMIXTURE results for each K
+### Visualizar los resultados de ADMIXTURE para cada *K*
 
-prepare to plot: information to plot on the admixture bars, from your external info population file
+Preparar la visualización grafica en R. necesitamos añadir informaciones en los admixture bars, desde un archivo externo que tiene la información sobre cada individuo y cada población. 
+
 
 
 ```
@@ -357,9 +338,8 @@ text(labels.coords, par("usr")[3] + 1.03 , srt = 45, adj = 0, labels = namespop,
 
 
 
-Look at patterns across populations. Do they follow a geographic structure? Is there a sign of Admixture?
+Mira a los patrones de admixture entre poblaciones. Siguen un patrón geográfico? Hay casos de admixture?
 
-... 
 ________________________________
 
 
