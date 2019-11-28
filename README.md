@@ -7,12 +7,14 @@ output: rmarkdown::github_document
 
 ## A dataset of Human Diversity
 
-In this exercise we are going to work with a SNP dataset typed for different human populations. The purpose of these analysis is to understand human variation through population history. We are chosing a SNP chip array designed by for maximizing information on human diversity and demographic events, named Human Origins (Affymetrix). The design of this SNP chip includes variants found in populations from different continents, and minimizes ascertainment bias.
+En este ejercicio vamos a trabajar con un dataset de SNP chip que incluye diferentes poblaciones. El objetivo es comprender la variación genética humana a través de la historia poblacional. Elegimos un SNP chip array diseñado para los estudios de historia humana, para maximizar la información sobre diversidad humana y reconstruir eventos demográficos. El nombre de lo SNP chip es Human Origins (Affymetrix). El array incluye SNPs que se encuentran en poblaciones de diferentes continentes, para minimizar el ascertainment bias effect. 
 
-We will be working with PLINK, a software for data manipulation and basic statistics, and ADMIXTURE for reconstructing different ancestry across individuals.
 
-We will be starting with a dataset of 100 individuals and 14 populations from Africa and Middle East. Published data is taken from [Patterson et al. 2012](https://reich.hms.harvard.edu/sites/reich.hms.harvard.edu/files/inline-files/2012_Patterson_AncientAdmixture_Genetics.pdf) 
+Trabajamos con PLINK para mirar el dataset y correr simples análisis, y ADMIXTURE para reconstruir componentes de ancestralidad entre los individuos.   
+
+El dataset incluye 100 individuos y 14 poblaciones de Africa y Medio Oriente. El dato esta publicado en [Patterson et al. 2012](https://reich.hms.harvard.edu/sites/reich.hms.harvard.edu/files/inline-files/2012_Patterson_AncientAdmixture_Genetics.pdf) 
 and [Lazaridis et al. 2014](https://reich.hms.harvard.edu/sites/reich.hms.harvard.edu/files/inline-files/2014_Nature_Lazaridis_EuropeThreeAncestries.pdf) .
+
 
 
 ```{r echo=FALSE ,message=FALSE, warning = FALSE}
@@ -29,7 +31,7 @@ geom_label_repel(force = 1)
 gg
 ```
 
-We are working local, from your computer. You can download the data from Github
+Trabajamos local, desde el terminal. Puedes descargar la carpeta con todo los datos desde GitHub
 
 ```
 git clone https://github.com/chiarabarbieri/Bio373_Blockcourse.git
@@ -40,24 +42,24 @@ ___________________________
 
 # PLINK
 
-Available at  <https://www.cog-genomics.org/plink/1.9/>.
-Tool created for genome-wide association studies (GWAS) and research in population genetics. 
-PLINK parses each command line as a collection of flags (each of which starts with two dashes), plus parameters (which immediately follow a flag).  Because PLINK was developed for GWAS medical studies, many basic informations will be not used in our analysis, such as pedigree or phenotype.
+Disponible en   <https://www.cog-genomics.org/plink/1.9/>.
+Es una herramienta para genome-wide association studies (GWAS) y investigación de genética poblacional.
+PLINK trabaja con comandos y “flag”. Cada flag empieza con dos guiónes. El flag puede ser seguido por parámetros. PLINK fue desarrollado para estudios médicos, y los formatos utilizan informaciones como pedigree o fenotipo que no nos interesan para nuestras análisis. 
 
 
-### Different formats for input files
+### Formatos diferentes para los input files
 
-PLINK can take different inputs, including .vcf. The native PLINK formats consist of tables of samples and variant calls.
+PLINK puede tomar varios input files, también .vcf. El formato nativo de PLINK consiste en tablas de individuos y variant calls. 
 
-The formats come in two version: binary (bed + bim + fam) and text (ped + map).
+El formato se encuentra en dos variantes: binario (bed + bim + fam) y texto (ped + map).
 
-The .ped includes ID, pedigree(optional) + genotype table, the .map is basically the list of SNPs with chromosome position and alleles. The two (or three) files have to be called with the same name.
+El .ped incluye ID, pedigree (optional) + tabla de genotipo. El .map es básicamente la lista de SNPs con posición cromosómica y alleles. Los dos o tres archivos deben tener el mismo nombre (solo varia el sufijo). 
 
 *.bed* for binary and *.ped* for text files:
-Containing the genotype information. One line per individual.
+Contiene la información del genotipo. Una línea para cada individuo.
 
-The *.ped* file contains also information on the individual. In the binary form this is contained in the .fam file.
-The first six columns of the *.ped*  (mandatory), and the *.fam* therefore look the same:
+El *.ped* file contiene también información para cada individuo. En la forma binaria, esta información esta contenida en el file .fam. 
+Las primeras seis columnas del *.ped*  y del  *.fam* son las mismas:
      
      Family ID
      Individual ID
@@ -68,9 +70,9 @@ The first six columns of the *.ped*  (mandatory), and the *.fam* therefore look 
 
 
 
-*.map* for text files:
-list of markers.
-Each line of the MAP file describes a single marker and must contain exactly 4 columns:
+*.map* para archivos de textos:
+Lista de marcadores geneticos.
+Cada línea del .map describe un marcador y debe contener 4 columnas:
 
      chromosome (1-22, X, Y or 0 if unplaced)
      rs# or snp identifier
@@ -78,55 +80,56 @@ Each line of the MAP file describes a single marker and must contain exactly 4 c
      Base-pair position (bp units)
      
 
-*.bim* for binary 
-Each line of the MAP file describes a single marker and must contain exactly 6 columns.
-It is an extended .map file with two extra columns for allele names.
+*.bim* para archivos binarios:
+Cada línea del  .bim describe un marcador y contiene seis columnas. Es una forma extendida del .map file con dos columnas mas con los alelos. 
      
 
 
-### From one format to another
+### desde un formato hasta otro
 
-The command like of PLINK is 
+La línea de comando de PLINK es
 
 ```
-plink --file yourfile --flag modifiers that makes some action on your file
+plink --file TuArchivo --flag modifiers que hacen algo con tu fichero
 ```
 
-where *yourfile* is the root name of the two text files .ped and .map. if you use the flag --bfile, instead, you call the three binary files .bed, .bin and .fam.
+donde * TuArchivo * es la raíz del nombre compartida entre los dos ficheros .ped y .map. Si tu utilizas el flag --bfile, en cambio, vas a llamar los tres ficheros binarios .bed, .bin y .fam.
 
-We start with some example: pass from one file format to the other and look at the differences between them on the terminal.
+Ejemplo: pasar entre un formato y otro y mirar a las diferencias en el terminal.
 
 ```
 plink --bfile HumanDataHO --recode
 ```
 
-Explore the newly generated files.
+La documentación online describe otros flags para manipular ficheros. 
 
-Navigate the online material and find which flags you can use to turn the file into a vcf format. 
+Otras herramientas útiles son: hacer un subset de SNPs, un subset de individuos, merge entre datasets. 
 
-Other useful tools: subest a list of SNP, subset a list of individuals, merge two datasets. 
+## Herramientas básicas de genética de poblacion
 
+Generar simple summary statistics. Proporción de datos faltante. Diversidad dentro población y entre poblaciones. 
 
-## Basic population genetics tools
+### datos faltantes
 
-Generate some simple summary statistics: rates of missing data in the file. Diversity within the samples and between the samples.
+Con el flag --missing. Exploramos los outputs. Como esta la proporción de datos faltante para marcador genético y para individuos? 
 
-### Missing data
-
-Use the flag --missing and explore the outputs. How is the rate of missing data per individual and per marker looking like?
 
 ```
 plink --bfile HumanDataHO --missing
 ```
+Trazamos un grafico en R. 
 
 
 ```{r echo=FALSE}
 library("ggplot2")
 aa<-read.table("missing.imiss", header=T)
+pdf("missing.pdf")
+
 ggplot(aa, aes(FID,F_MISS))+
          geom_boxplot()+
      theme(axis.text.x = element_text(angle = 45, vjust=1, hjust=1)) +
    labs(title = "percentage of missing data per individual")
+   dev.off()
 
 ```
 
@@ -137,7 +140,8 @@ ggplot(aa, aes(FID,F_MISS))+
 
 
 
-We run another plink command to explore F, the degree of consanguineity, and eventually delete outliers with a very high F.
+Con otro comando en PLINK miramos a F, el grado de consanguineidad. Si es el caso, podemos eliminar individuos con un F muy alto. 
+
 
 *--het* computes observed and expected autosomal homozygous genotype counts for each sample, and reports method-of-moments F coefficient estimates (i.e. ([observed hom. count] - [expected count]) / ([total observations] - [expected count])) to plink.het. 
 
@@ -146,7 +150,8 @@ We run another plink command to explore F, the degree of consanguineity, and eve
 plink --bfile HumanDataHO --het
 ```
 
-Visualize the difference in heterozygosity within populations.
+Visualizamos las diferencias en heterocigosidad entre poblaciones.
+
 
 ```{r message=FALSE, warning = FALSE}
 het<-read.table("plink.het", header=T)
@@ -181,7 +186,8 @@ gg + geom_point(data=infoo, aes(x=lon, y=lat, color=het), size=5 )+
 
 ```
 
-Does the diversity fit an Out Of Africa model for human migrations?
+La diversidad sigue el modelo de migraciones humanas Out of Africa?
+
 
 ___________________________
 
