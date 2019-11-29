@@ -74,10 +74,10 @@ Cada línea del  .bim describe un marcador y contiene seis columnas. Es una form
 La línea de comando de PLINK es
 
 ```
-plink --file TuArchivo --flag modifiers que hacen algo con tu fichero
+plink --file TuArchivo --flag modifiers que hacen algo con tu archivo
 ```
 
-donde * TuArchivo * es la raíz del nombre compartida entre los dos ficheros .ped y .map. Si tu utilizas el flag --bfile, en cambio, vas a llamar los tres ficheros binarios .bed, .bin y .fam.
+donde * TuArchivo * es la raíz del nombre compartida entre los dos archivos .ped y .map. Si tu utilizas el flag --bfile, en cambio, vas a llamar los tres archivos binarios .bed, .bin y .fam.
 
 Ejemplo: pasar entre un formato y otro y mirar a las diferencias en el terminal.
 
@@ -85,7 +85,7 @@ Ejemplo: pasar entre un formato y otro y mirar a las diferencias en el terminal.
 plink --bfile HumanDataHO --recode
 ```
 
-La documentación online describe otros flags para manipular ficheros. 
+La documentación online describe otros flags para manipular archivos. 
 
 Otras herramientas útiles son: hacer un subset de SNPs, un subset de individuos, merge entre datasets. 
 
@@ -179,7 +179,7 @@ ___________________________
 
 Con el flag modificador *--pca* PLINK extrae las primeras 20 componentes principales de la matriz de relación estandarizada de varianza.
 
-Los resultados consisten en un archivo *.eigenvec* con las coordinadas de cada individuo en cada línea,  y un fichero *.eigenval* que explica cuanta varianza esta en el dato para cada vector. 
+Los resultados consisten en un archivo *.eigenvec* con las coordinadas de cada individuo en cada línea,  y un archivo *.eigenval* que explica cuanta varianza esta en el dato para cada vector. 
 
 ```{r message=FALSE, warning = FALSE}
 eigenvec<-read.table("plink.eigenvec")
@@ -214,7 +214,7 @@ ADMIXTURE toma el formato de archivo de PLINK.  Mas informaciones en <https://ww
 
 Primero, hacemos pruning del dataset para excluir SNPs in linkage. 
 
-El fichero resultante tendrá menos SNPs, y las computaciones serán mas rápidas. 
+El archivo resultante tendrá menos SNPs, y las computaciones serán mas rápidas. 
 
 
 ```
@@ -441,7 +441,7 @@ EXTRA: mira al numero de mutaciones. Cuanto antigua es la raíz del árbol? Soar
 ### Neighbour Joining tree poblaciones
 
 Visualizar distancias entre poblaciones con un árbol (sin raíz). Mira a los outliers. 
-Utilizamos un fichero con información sobre cada población, para colorarlas con su familia lingüística. 
+Utilizamos un archivo con información sobre cada población, para colorarlas con su familia lingüística. 
 
 ```{r}
 popOrder <- read.table("popOrderColor", as.is=T)
