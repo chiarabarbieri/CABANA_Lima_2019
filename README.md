@@ -13,26 +13,7 @@ En este ejercicio vamos a trabajar con un dataset de SNP chip que incluye difere
 Trabajamos con PLINK para mirar el dataset y correr simples análisis, y ADMIXTURE para reconstruir componentes de ascendencias entre los individuos.   
 
 El dataset incluye 100 individuos y 14 poblaciones de Africa y Medio Oriente. El dato esta publicado en [Patterson et al. 2012](https://reich.hms.harvard.edu/sites/reich.hms.harvard.edu/files/inline-files/2012_Patterson_AncientAdmixture_Genetics.pdf) 
-and [Lazaridis et al. 2014](https://reich.hms.harvard.edu/sites/reich.hms.harvard.edu/files/inline-files/2014_Nature_Lazaridis_EuropeThreeAncestries.pdf) .
-
-
-
-```{r echo=FALSE ,message=FALSE, warning = FALSE}
-infoo<-read.table("infopopExercis.txt", as.is = T, header=T,quote = "", sep="\t")
-library("maps")
-library("ggrepel")
-library("ggplot2")
-
-
-map.world<-map_data(map="world")
-gg <- ggplot()
-gg <- gg + theme()
-gg <- gg + geom_map(data=map.world, map=map.world, aes(map_id=region), fill="white", colour="black", size=0.15)
-gg<- gg+coord_quickmap(ylim=c(-30,40), xlim=c(0,50))+
-  geom_label(data=infoo,aes(x=lon, y=lat,label =PopName)) +
-geom_label_repel(force = 1)
-gg
-```
+y [Lazaridis et al. 2014](https://reich.hms.harvard.edu/sites/reich.hms.harvard.edu/files/inline-files/2014_Nature_Lazaridis_EuropeThreeAncestries.pdf) .
 
 Trabajamos local, desde el terminal. Puedes descargar la carpeta con todo los datos desde GitHub
 
