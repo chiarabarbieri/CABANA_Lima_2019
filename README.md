@@ -21,6 +21,9 @@ and [Lazaridis et al. 2014](https://reich.hms.harvard.edu/sites/reich.hms.harvar
 infoo<-read.table("infopopExercis.txt", as.is = T, header=T,quote = "", sep="\t")
 library("maps")
 library("ggrepel")
+library("ggplot2")
+
+
 map.world<-map_data(map="world")
 gg <- ggplot()
 gg <- gg + theme()
@@ -34,7 +37,7 @@ gg
 Trabajamos local, desde el terminal. Puedes descargar la carpeta con todo los datos desde GitHub
 
 ```
-git clone https://github.com/chiarabarbieri/Bio373_Blockcourse.git
+git clone https://github.com/chiarabarbieri/CABANA_Lima_2019
 ```
 
 
@@ -122,7 +125,7 @@ Trazamos un grafico en R.
 
 ```{r echo=FALSE}
 library("ggplot2")
-aa<-read.table("missing.imiss", header=T)
+aa<-read.table("plink.imiss", header=T)
 pdf("missing.pdf")
 
 ggplot(aa, aes(FID,F_MISS))+
@@ -201,7 +204,6 @@ Los resultados consisten en un archivo *.eigenvec* con las coordinadas de cada i
 eigenvec<-read.table("plink.eigenvec")
 eigenval<-read.table("plink.eigenval")
 
-library("ggplot2")
 library("RColorBrewer")
 library("colorRamps")
 pdf("pca.pdf")
@@ -282,7 +284,8 @@ Preparar la visualización grafica en R. necesitamos añadir informaciones en lo
 ```
 
 MYINFO<-read.table("infoAdmixtureExercis.txt", header=T, as.is=T)
-
+minK<-2
+maxK<-5
 
 table(MYINFO$population)->pops
 namespop<-unique(MYINFO$population)
@@ -398,7 +401,7 @@ treeRED$edge.length[treeRED$edge.length < 0] = 0.002 #little trick to avoid nega
 Visualizamos el árbol.
 
 ```
-pdf("treeNJ.pdf)
+pdf("treeNJ.pdf")
 plot.phylo(treeRED, type="u", tip.col="blue", cex=0.3 ) #plot the tree as unrooted
 dev.off()
 
